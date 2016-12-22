@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include "mylib.c"
 
 int main() {
-    int choice = 0;
-
+    int choice;
+    system("cls");
     printf("+-----------------------------------------------------------------------------+\n");
     printf("|                    [1] CREA PERCORSO                                        |\n");
     printf("|                    [2] MUOVI OBERON                                         |\n");
@@ -12,13 +13,13 @@ int main() {
 
     do{
 
-        printf("Cosa vuoi fare ? ");
-        scanf(" %d ", &choice);
+        printf("Cosa vuoi fare ?");
+        scanf("%d", &choice);
 
         switch(choice){
             case 1:
-                // TODO add function crea_percorso()
                 printf("Crea percorso \n");
+                crea_percorso();
                 break;
             case 2:
                 // TODO add function muovi_oberon()
