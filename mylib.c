@@ -4,6 +4,7 @@
 
 #include "mylib.h"
 
+
 static void ins_terra();
 static void stampa_percorso();
 static void canc_terra();
@@ -15,6 +16,7 @@ static Terra_t *ultima_terra = NULL;
 static bool endGame = false;
 
 static const char *tipiTerra[] = {"Deserto", "Palude", "Villaggio", "Pianura", "Foresta"};
+static const char *tipiMostro[] = {"None", "Scheletro", "Lupo", "Orco", "Drago"};
 
 void crea_percorso(){
     int choice;
@@ -22,14 +24,14 @@ void crea_percorso(){
     endGame = false;
 
     do{
-        printf("--------------------------\n");
-        printf("      Cosa vuoi fare      \n");
-        printf("---------------------------\n");
+        printf("----------------------------\n");
+        printf("      Cosa vuoi fare        \n");
+        printf("----------------------------\n");
         printf("|     [1] Inserisci terra | \n");
         printf("|     [2] Cancella terra  | \n");
         printf("|     [3] Stampa Percorso | \n");
         printf("|     [4] chiudi percorso | \n");
-        printf("---------------------------\n");
+        printf("----------------------------\n");
         scanf("%d", &choice);
 
         switch(choice){
@@ -58,9 +60,9 @@ static void ins_terra() {
 
     printf("-----------------------------------\n");
     for(int i = 0; i < 5; i++) {
-        printf("  [%d] per inserire %s \n", i, tipiTerra[i]);
+        printf("[%d] per inserire %s \n", i, tipiTerra[i]);
     }
-    printf("------------------------------");
+    printf("-----------------------------------\n");
 
     int choice;
     scanf("%d", &choice);
@@ -99,18 +101,20 @@ static void ins_terra() {
 }
 
 static void canc_terra() {
-    if(percorso == NULL || ultima_terra == NULL){
-        return;
-    }
+    if(percorso == NULL || ultima_terra == NULL) return;
 
     if(percorso == ultima_terra) {
+        printf("Rimozione di %s \n", tipiTerra[percorso->tipo]);
         free(percorso);
+        percorso = NULL;
+        ultima_terra = NULL;
     }
-    else{
+    else {
         Terra_t *t = percorso;
         while(t->successiva != ultima_terra){
             t = t->successiva;
         }
+        printf("Rimozione di %s \n", tipiTerra[ultima_terra->tipo]);
         free(ultima_terra);
         ultima_terra = t;
         t->successiva = NULL;
@@ -119,12 +123,11 @@ static void canc_terra() {
 
 
 static void stampa_percorso() {
-    if(percorso == NULL) {
-        return;
-    }
+    // TODO: this function should print all the info
+    if(percorso == NULL) return;
 
     Terra_t *t = percorso;
-    int c = 0;
+    int c = 1;
 
     printf("Percorso Creato: \n");
     do{

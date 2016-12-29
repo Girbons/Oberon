@@ -4,16 +4,16 @@
 
 int main() {
     int choice;
-    system("cls");
-    printf("+-----------------------------------------------------------------------------+\n");
-    printf("|                    [1] CREA PERCORSO                                        |\n");
-    printf("|                    [2] MUOVI OBERON                                         |\n");
-    printf("|                    [3] TERMINA GIOCO                                        |\n");
-    printf("+-----------------------------------------------------------------------------+\n");
 
     do{
-
         printf("Cosa vuoi fare ?");
+        printf("+-----------------------------------------------------------------------------+\n");
+        printf("|                    [1] CREA PERCORSO                                        |\n");
+        printf("|                    [2] MUOVI OBERON                                         |\n");
+        printf("|                    [3] TERMINA GIOCO                                        |\n");
+        printf("+-----------------------------------------------------------------------------+\n");
+
+
         scanf("%d", &choice);
 
         switch(choice){

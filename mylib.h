@@ -16,11 +16,12 @@ typedef enum TipoTerra {
 
 typedef struct Mostro {
     TipoMostro_t tipo;
+    int hp;
+    int danno;
 } Mostro_t;
 
 typedef struct Terra {
     TipoTerra_t tipo;
+    Mostro_t mostro;
     struct Terra* successiva;
 } Terra_t;
-
-
