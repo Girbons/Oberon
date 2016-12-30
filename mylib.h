@@ -23,5 +23,13 @@ typedef struct Mostro {
 typedef struct Terra {
     TipoTerra_t tipo;
     Mostro_t mostro;
-    struct Terra* successiva;
+    short tesoro;
+    struct Terra *successiva;
 } Terra_t;
+
+typedef struct Oberon {
+    short borsa_oro;
+    short punti_ferita;
+    short incantesimi;
+    short pozione_guarigione;
+} Oberon_t;

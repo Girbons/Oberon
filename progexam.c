@@ -6,7 +6,7 @@ int main() {
     int choice;
 
     do{
-        printf("Cosa vuoi fare ?");
+        printf("Cosa vuoi fare ? \n");
         printf("+-----------------------------------------------------------------------------+\n");
         printf("|                    [1] CREA PERCORSO                                        |\n");
         printf("|                    [2] MUOVI OBERON                                         |\n");

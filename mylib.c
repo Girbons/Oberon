@@ -13,6 +13,8 @@ static void chiudi_percorso();
 static Terra_t *percorso = NULL;
 static Terra_t *ultima_terra = NULL;
 
+static Oberon_t *oberon;
+
 static bool endGame = false;
 
 static const char *tipiTerra[] = {"Deserto", "Palude", "Villaggio", "Pianura", "Foresta"};
@@ -69,14 +71,17 @@ static void ins_terra() {
 
     switch(choice) {
         case 0:
+            // TOADD: ogre can't stay here'
             terra->tipo = Deserto;
             printf("Inserimento di %s \n", tipiTerra[0]);
             break;
         case 1:
+            // TODO: skeleton can't stay here
             terra->tipo = Palude;
             printf("Inserimento di %s \n", tipiTerra[1]);
             break;
         case 2:
+            // TODO: doesn't contains monster'
             terra->tipo = Villaggio;
             printf("Inserimento di %s \n", tipiTerra[2]);
             break;
@@ -85,6 +90,7 @@ static void ins_terra() {
             printf("Inserimento di %s \n", tipiTerra[3]);
             break;
         case 4:
+            // TOADD: wolf can't stay here'
             terra->tipo = Foresta;
             printf("Inserimento di %s \n", tipiTerra[4]);
             break;
@@ -124,19 +130,20 @@ static void canc_terra() {
 
 static void stampa_percorso() {
     // TODO: this function should print all the info
-    if(percorso == NULL) return;
+    if(percorso == NULL) {
+        printf("Non sono presenti terre da rimuovere \n");
+        return;
+    };
 
     Terra_t *t = percorso;
-    int c = 1;
 
     printf("Percorso Creato: \n");
     do{
-        printf("Terra %d %s \n", c++, tipiTerra[t->tipo]);
+        printf("Terra %s \n",  tipiTerra[t->tipo]);
     }while((t = t->successiva) != NULL);
 }
 
 
 static void chiudi_percorso() {
     endGame = true;
-}
-
+}   
