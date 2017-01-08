@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <stdbool.h>
 
 #include "mylib.h"
@@ -9,16 +10,19 @@ static void ins_terra();
 static void stampa_percorso();
 static void canc_terra();
 static void chiudi_percorso();
+static void spawn_monster(Mostro_t *monster);
+static int count_terre(Terra_t *terra);
 
-static Terra_t *percorso = NULL;
-static Terra_t *ultima_terra = NULL;
+static Terra_t *route = NULL;
+static Terra_t *last_land = NULL;
 
 static Oberon_t *oberon;
 
 static bool endGame = false;
+bool validateMonster = false;
 
-static const char *tipiTerra[] = {"Deserto", "Palude", "Villaggio", "Pianura", "Foresta"};
-static const char *tipiMostro[] = {"None", "Scheletro", "Lupo", "Orco", "Drago"};
+static const char *typeLand[] = {"Desert", "Forest", "Swamp", "Villagge", "Plain"};
+static const char *typeMonster[] = {"Skeleton", "Wolf", "Ogre", "Drake"};
 
 void crea_percorso(){
     int choice;
@@ -58,11 +62,11 @@ void crea_percorso(){
 
 static void ins_terra() {
     Terra_t *terra = malloc(sizeof(Terra_t));
-    terra->successiva = NULL;
+    terra->next = NULL;
 
     printf("-----------------------------------\n");
     for(int i = 0; i < 5; i++) {
-        printf("[%d] per inserire %s \n", i, tipiTerra[i]);
+        printf("[%d] per inserire %s \n", i, typeLand[i]);
     }
     printf("-----------------------------------\n");
 
@@ -71,79 +75,132 @@ static void ins_terra() {
 
     switch(choice) {
         case 0:
-            // TOADD: ogre can't stay here'
-            terra->tipo = Deserto;
-            printf("Inserimento di %s \n", tipiTerra[0]);
+            terra->type = Desert;
+            printf("Inserimento di Deserto \n");
             break;
         case 1:
-            // TODO: skeleton can't stay here
-            terra->tipo = Palude;
-            printf("Inserimento di %s \n", tipiTerra[1]);
+            terra->type = Swamp;
+            printf("Inserimento di Palude \n");
             break;
         case 2:
-            // TODO: doesn't contains monster'
-            terra->tipo = Villaggio;
-            printf("Inserimento di %s \n", tipiTerra[2]);
+            terra->type = Village;
+            printf("Inserimento di Villaggio \n");
             break;
         case 3:
-            terra->tipo = Pianura;
-            printf("Inserimento di %s \n", tipiTerra[3]);
+            terra->type = Plain;
+            printf("Inserimento di Pianura \n");
             break;
         case 4:
-            // TOADD: wolf can't stay here'
-            terra->tipo = Foresta;
-            printf("Inserimento di %s \n", tipiTerra[4]);
+            terra->type = Forest;
+            printf("Inserimento di Foresta \n");
             break;
     }
-    if(percorso == NULL) {
-        percorso = terra;
+
+   // if(terra->type != Village && count_terre(route) > 0) {
+        spawn_monster(&(terra)->monster);
+    //}
+
+    if(route == NULL) {
+        route = terra;
     }
 
-    if(ultima_terra != NULL) {
-        ultima_terra->successiva = terra;
+    if(last_land != NULL) {
+        last_land->next = terra;
     }
 
-    ultima_terra = terra;
+    last_land = terra;
 }
 
 static void canc_terra() {
-    if(percorso == NULL || ultima_terra == NULL) return;
+    if(route == NULL || last_land == NULL) return;
 
-    if(percorso == ultima_terra) {
-        printf("Rimozione di %s \n", tipiTerra[percorso->tipo]);
-        free(percorso);
-        percorso = NULL;
-        ultima_terra = NULL;
+    if(route == last_land) {
+        printf("Rimozione di %s \n", typeLand[route->type]);
+        free(route);
+        route = NULL;
+        last_land = NULL;
     }
     else {
-        Terra_t *t = percorso;
-        while(t->successiva != ultima_terra){
-            t = t->successiva;
+        Terra_t *t = route;
+        while(t->next != last_land){
+            t = t->next;
         }
-        printf("Rimozione di %s \n", tipiTerra[ultima_terra->tipo]);
-        free(ultima_terra);
-        ultima_terra = t;
-        t->successiva = NULL;
+        printf("Rimozione di %s \n", typeLand[last_land->type]);
+        free(last_land);
+        last_land = t;
+        t->next = NULL;
     }
 }
 
 
 static void stampa_percorso() {
     // TODO: this function should print all the info
-    if(percorso == NULL) {
+    if(route == NULL) {
         printf("Non sono presenti terre da rimuovere \n");
         return;
     };
 
-    Terra_t *t = percorso;
+    Terra_t *t = route;
 
-    printf("Percorso Creato: \n");
-    do{
-        printf("Terra %s \n",  tipiTerra[t->tipo]);
-    }while((t = t->successiva) != NULL);
+    while(t != NULL) {
+        printf("Terra: %s \n", typeLand[t->type]);
+        printf("Mostro: %s \n", typeMonster[t->monster.type]);
+        // todo add oro presente in questa terra
+        t = t->next;
+    }
 }
 
 
 static void chiudi_percorso() {
     endGame = true;
-}   
+}
+
+static void spawn_monster(Mostro_t *monster) {
+    int choice;
+
+    printf("-------------------------------------------------------- \n"
+            "Scheletro/Skeleton non puo' essere inserito in Palude \n"
+            "Orco/Ogre non puo' essere inserito in Deserto \n"
+            "Lupo non pu'o essere inserito in Deserto o Palude \n"
+            "---------------------------------------------------- \n");
+
+    for(int i = 0; i < 4; i++) {
+        printf("[%d] per inserire %s \n", i, typeMonster[i]);
+    }
+    printf("Quale mostro vuoi inserire ? \n");
+    scanf("[%d]", &choice);
+    printf("---------------------------------------------------- \n");
+
+    switch(choice) {
+        case 0:
+            monster->type = Skeleton;
+            monster->hp = 2;
+            monster->damage = 2;
+            break;
+        case 1:
+            monster->type = Wolf;
+            monster->hp = 1;
+            monster->damage = 1;
+            break;
+        case 2:
+            monster->type = Ogre;
+            monster->hp = 3;
+            monster->damage = 3;
+            break;
+        case 3:
+            monster->type = Dragon;
+            monster->hp = 5;
+            monster->damage = 5;
+            break;
+    }
+}
+
+static int count_terre(Terra_t *terra) {
+    int count = 0;
+
+    while(terra != NULL) {
+        count++;
+        terra = terra->next;
+    }
+    return count;
+}

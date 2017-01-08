@@ -1,35 +1,34 @@
 typedef enum TipoMostro {
-    None,
-    Scheletro,
-    Lupo,
-    Orco,
-    Drago,
+    Skeleton,
+    Wolf,
+    Ogre,
+    Dragon,
 } TipoMostro_t;
 
 typedef enum TipoTerra {
-    Deserto,
-    Foresta,
-    Palude,
-    Villaggio,
-    Pianura,
+    Desert,
+    Forest,
+    Swamp,
+    Village,
+    Plain,
 } TipoTerra_t;
 
 typedef struct Mostro {
-    TipoMostro_t tipo;
+    TipoMostro_t type;
     int hp;
-    int danno;
+    int damage;
 } Mostro_t;
 
 typedef struct Terra {
-    TipoTerra_t tipo;
-    Mostro_t mostro;
-    short tesoro;
-    struct Terra *successiva;
+    TipoTerra_t type;
+    Mostro_t monster;
+    short treasure;
+    struct Terra *next;
 } Terra_t;
 
 typedef struct Oberon {
-    short borsa_oro;
-    short punti_ferita;
-    short incantesimi;
-    short pozione_guarigione;
+    short bag_gold;
+    short hit_points;
+    short spells;
+    short health_potion;
 } Oberon_t;
