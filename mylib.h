@@ -1,4 +1,5 @@
 typedef enum TipoMostro {
+    None,
     Skeleton,
     Wolf,
     Ogre,
@@ -22,7 +23,7 @@ typedef struct Mostro {
 typedef struct Terra {
     TipoTerra_t type;
     Mostro_t monster;
-    short treasure;
+    short gold;
     struct Terra *next;
 } Terra_t;
 
