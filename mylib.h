@@ -23,13 +23,13 @@ typedef struct Mostro {
 typedef struct Terra {
     TipoTerra_t type;
     Mostro_t monster;
-    short gold;
+    short coins;
     struct Terra *next;
 } Terra_t;
 
 typedef struct Oberon {
     short bag_gold;
-    short hit_points;
+    short hp;
     short spells;
     short health_potion;
 } Oberon_t;

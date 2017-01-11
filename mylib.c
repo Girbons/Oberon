@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <stdbool.h>
 
 #include "mylib.h"
@@ -12,6 +11,9 @@ static void canc_terra();
 static void chiudi_percorso();
 static void spawn_monster(Mostro_t *monster);
 static int count_terre(Terra_t *terra);
+
+static void go_forward();
+static void get_coins();
 
 static Terra_t *route = NULL;
 static Terra_t *last_land = NULL;
@@ -27,18 +29,19 @@ static const char *typeMonster[] = {"None", "Skeleton", "Wolf", "Ogre", "Drake"}
 TODO: Add docstring for this function
 */
 void crea_percorso() {
+    system("clear");
     int choice;
 
     endGame = false;
 
     do{
         printf("----------------------------\n");
-        printf("      Cosa vuoi fare        \n");
+        printf("    What do you want to do? \n");
         printf("----------------------------\n");
-        printf("|     [1] Inserisci terra | \n");
-        printf("|     [2] Cancella terra  | \n");
-        printf("|     [3] Stampa Percorso | \n");
-        printf("|     [4] chiudi percorso | \n");
+        printf("|     [1] Insert a new land | \n");
+        printf("|     [2] Remove Land       | \n");
+        printf("|     [3] Print the Route   | \n");
+        printf("|     [4] Close the Route   | \n");
         printf("----------------------------\n");
         scanf("%d", &choice);
 
@@ -56,7 +59,7 @@ void crea_percorso() {
                 chiudi_percorso();
                 break;
             default:
-                printf("Inserire una scelta valida");
+                printf("Insert a valid choice \n");
         }
     }while(!endGame);
 
@@ -66,16 +69,20 @@ void crea_percorso() {
 TODO: Add docstring for this function
 */
 static void ins_terra() {
+    system("clear");
     Terra_t *terra = malloc(sizeof(Terra_t));
 
-    bool check = false;
-    short gold = 0;
+    short coins = 0;
 
+    bool check = false;
+    bool isMonsterValid = false;
+
+    // initialization of pointer to the next land
     terra->next = NULL;
 
     printf("-----------------------------------\n");
     for(int i = 0; i < 5; i++) {
-        printf("[%d] per inserire %s \n", i, typeLand[i]);
+        printf("[%d] %s \n", i, typeLand[i]);
     }
     printf("-----------------------------------\n");
 
@@ -85,34 +92,36 @@ static void ins_terra() {
     switch(choice) {
         case 0:
             terra->type = Desert;
-            printf("Inserimento di Deserto \n");
+            printf("Desert inserted \n");
             break;
         case 1:
             terra->type = Forest;
-            printf("Inserimento di Foresta \n");
+            printf("Forest inserted \n");
             break;
         case 2:
             terra->type = Swamp;
-            printf("Inserimento di Palude \n");
+            printf("Swamp inserted \n");
             break;
         case 3:
             terra->type = Village;
-            printf("Inserimento di Village \n");
+            printf("Village inserted \n");
             break;
         case 4:
             terra->type = Plain;
-            printf("Inserimento di Pianura \n");
+            printf("Plain inserted \n");
             break;
     }
 
     do{
-        printf("Inserisci Oro \n");
-        scanf("%hd", &gold);
-        if(terra->type == Village && gold > 10) {
-            printf("Villaggio non puo' contenere piu' di 10 monete \n");
+        printf("Insert coins for this land \n -->");
+        scanf("%hd", &coins);
+        if(terra->type == Village && coins > 10) {
+            printf("--------------------Warning------------------ \n");
+            printf("    Village can't contain more than 10 coins  \n");
+            printf("--------------------------------------------- \n");
         } else {
             check = true;
-            terra->gold = gold;
+            terra->coins = coins;
         }
 
     }while(check != true);
@@ -123,8 +132,24 @@ static void ins_terra() {
         terra->monster.damage = 0;
     }
 
+    if(terra->type == Village) {
+        terra->monster.type = None;
+        terra->monster.hp = 0;
+        terra->monster.damage = 0;
+    }
+
     if(terra->type != Village && count_terre(route) > 0) {
-        spawn_monster(&(terra)->monster);
+        while(isMonsterValid != true) {
+            spawn_monster(&(terra)->monster);
+            if((terra->type == Swamp && terra->monster.type == Skeleton) || (terra->type == Desert && terra->monster.type == Ogre) ||
+                (terra->type == Swamp && terra->monster.type == Wolf) || (terra->type == Desert && terra->monster.type == Wolf)) {
+                    printf("--------------------Warning--------------------------- \n");
+                    printf("You can't insert %s in %s \n", typeMonster[terra->monster.type], typeLand[terra->type]);
+                }
+                else {
+                    isMonsterValid = true;
+                }
+        }
     }
 
     if(route == NULL) {
@@ -136,6 +161,7 @@ static void ins_terra() {
     }
 
     last_land = terra;
+    system("clear");
 }
 
 /*
@@ -145,7 +171,7 @@ static void canc_terra() {
     if(route == NULL || last_land == NULL) return;
 
     if(route == last_land) {
-        printf("Rimozione di %s \n", typeLand[route->type]);
+        printf("Removing %s \n", typeLand[route->type]);
         free(route);
         route = NULL;
         last_land = NULL;
@@ -155,11 +181,12 @@ static void canc_terra() {
         while(t->next != last_land){
             t = t->next;
         }
-        printf("Rimozione di %s \n", typeLand[last_land->type]);
+        printf("Removing %s \n", typeLand[last_land->type]);
         free(last_land);
         last_land = t;
         t->next = NULL;
     }
+    system("clear");
 }
 
 /*
@@ -168,7 +195,7 @@ TODO: Add docstring for this function
 static void stampa_percorso() {
     // TODO: this function should print all the info
     if(route == NULL) {
-        printf("Non sono presenti terre da rimuovere \n");
+        printf("There are no land to remove \n");
         return;
     };
 
@@ -176,11 +203,11 @@ static void stampa_percorso() {
 
     printf("--------------------------------------------- \n");
     while(t != NULL) {
-        printf("Terra: %s \n", typeLand[t->type]);
-        printf("Oro: %hd \n", t->gold);
-        printf("Mostro: %s \n", typeMonster[t->monster.type]);
+        printf("Land: %s \n", typeLand[t->type]);
+        printf("Coins: %hd \n", t->coins);
+        printf("Monster: %s \n", typeMonster[t->monster.type]);
         printf("--------------------------------------------- \n");
-        // todo add oro presente in questa terra
+
         t = t->next;
     }
 }
@@ -198,17 +225,19 @@ TODO: Add docstring for this function
 static void spawn_monster(Mostro_t *monster) {
     int choice;
 
-    printf("-------------------------------------------------------- \n"
-            "Scheletro/Skeleton non puo' essere inserito in Palude \n"
-            "Orco/Ogre non puo' essere inserito in Deserto \n"
-            "Lupo/Wolf non puo' essere inserito in Deserto o Palude \n"
-            "---------------------------------------------------- \n");
+    printf("--------------------------------------------------------  \n"
+            "                   CONSTRAINTS                           \n"
+            "        Skeleton cannot be inserted in Swamp             \n"
+            "        Ogre cannot be inserted in Desert                \n"
+            "        Wolf cannot be inserted in Desert or Swamp       \n"
+            "-------------------------------------------------------  \n");
 
     for(int i = 0; i < 5; i++) {
-        printf("[%d] per inserire %s \n", i, typeMonster[i]);
+        printf("[%d] %s \n", i, typeMonster[i]);
     }
+    printf("-------------------------------------------------- \n");
 
-    printf("Quale mostro vuoi inserire ?  \n");
+    printf("Which monster want you insert?  \n");
     scanf("%d", &choice);
 
     switch(choice) {
@@ -252,3 +281,75 @@ static int count_terre(Terra_t *terra) {
     }
     return count;
 }
+
+void muovi_oberon() {
+    system("clear");
+    int choice;
+
+    do{
+        printf("----------------------------\n");
+        printf("    What Oberon has to do?  \n");
+        printf("----------------------------\n");
+        printf("|     [1] Go Forward        | \n");
+        printf("|     [2] Get Coins         | \n");
+        printf("|     [3] Use Potions       | \n");
+        printf("|     [4] Fight             | \n");
+        printf("|     [5] Destroy Land      | \n");
+        printf("----------------------------\n");
+        scanf("%d", &choice);
+
+        switch(choice){
+            case 1:
+                go_forward(route->next);
+                break;
+            case 2:
+                get_coins();
+                break;
+            case 3:
+                printf("Usa pozione \n");
+                break;
+            case 4:
+                printf("Combatti \n");
+                break;
+            case 5:
+                printf("Distruggi Terra \n");
+                break;
+        }
+    }while(true);
+}
+
+static void go_forward() {
+    Terra_t *terra = route;
+
+    if(typeMonster[terra->monster.type] != "Drake") {
+        printf("========================================== \n");
+        printf("Land: %s \n", typeLand[terra->type]);
+        printf("Monster: %s \n", typeMonster[terra->monster.type]);
+        printf("Coins: %d \n", terra->coins);
+        printf("========================================== \n");
+
+    }
+    else {
+        if(terra->monster.hp == 0) {
+            printf("You have to fight %s \n", typeMonster[terra->monster.type]);
+            return;
+        }
+    }
+
+    if(route->next != NULL) {
+        route = route->next;
+    }
+}
+
+static void get_coins() {
+    return;
+}
+
+// static void use_potion() {
+// }
+
+// static void fight() {
+// }
+
+// static void destroy_land() {
+// }

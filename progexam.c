@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdbool.h>
-
 #include "mylib.c"
+
 
 int main() {
     int choice;
@@ -23,8 +21,8 @@ int main() {
                 crea_percorso();
                 break;
             case 2:
-                // TODO add function muovi_oberon()
                 printf("Muovi Oberon \n");
+                muovi_oberon();
                 break;
             case 3:
                 // TODO add function termina_gioco()
