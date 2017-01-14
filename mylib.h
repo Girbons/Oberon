@@ -3,7 +3,7 @@ typedef enum TipoMostro {
     Skeleton,
     Wolf,
     Ogre,
-    Dragon,
+    Drake,
 } TipoMostro_t;
 
 typedef enum TipoTerra {

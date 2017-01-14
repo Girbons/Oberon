@@ -10,7 +10,10 @@ static void stampa_percorso();
 static void canc_terra();
 static void chiudi_percorso();
 static void spawn_monster(Mostro_t *monster);
+
 static int count_terre(Terra_t *terra);
+static void land_details(Terra_t *terra);
+static void initialize_oberon(Oberon_t *oberon);
 
 static void go_forward();
 static void get_coins();
@@ -18,7 +21,7 @@ static void get_coins();
 static Terra_t *route = NULL;
 static Terra_t *last_land = NULL;
 
-static Oberon_t *oberon;
+static Oberon_t *oberon = NULL;
 
 static bool endGame = false;
 
@@ -193,7 +196,6 @@ static void canc_terra() {
 TODO: Add docstring for this function
 */
 static void stampa_percorso() {
-    // TODO: this function should print all the info
     if(route == NULL) {
         printf("There are no land to remove \n");
         return;
@@ -262,7 +264,7 @@ static void spawn_monster(Mostro_t *monster) {
             monster->damage = 3;
             break;
         case 4:
-            monster->type = Dragon;
+            monster->type = Drake;
             monster->hp = 5;
             monster->damage = 5;
             break;
@@ -283,6 +285,8 @@ static int count_terre(Terra_t *terra) {
 }
 
 void muovi_oberon() {
+    initialize_oberon(oberon);
+
     system("clear");
     int choice;
 
@@ -318,31 +322,61 @@ void muovi_oberon() {
     }while(true);
 }
 
+static void land_details(Terra_t *terra) {
+    printf("========================================== \n");
+    printf("Land: %s \n", typeLand[terra->type]);
+    printf("Monster: %s \n", typeMonster[terra->monster.type]);
+    printf("Coins: %d \n", terra->coins);
+    printf("========================================== \n");
+}
+
+static void initialize_oberon() {
+    Oberon_t *ober = malloc(sizeof(Oberon_t));
+    ober->bag_gold = 10;
+    ober->hp = 5;
+    ober->spells = 2;
+    ober->health_potion = 2;
+
+    oberon = ober;
+}
+
 static void go_forward() {
     Terra_t *terra = route;
 
-    if(typeMonster[terra->monster.type] != "Drake") {
-        printf("========================================== \n");
-        printf("Land: %s \n", typeLand[terra->type]);
-        printf("Monster: %s \n", typeMonster[terra->monster.type]);
-        printf("Coins: %d \n", terra->coins);
-        printf("========================================== \n");
+    printf("========================================== \n");
+    printf("Land: %s \n", typeLand[terra->type]);
+    printf("Monster: %s \n", typeMonster[terra->monster.type]);
+    printf("Coins: %d \n", terra->coins);
+    printf("========================================== \n");
 
-    }
-    else {
-        if(terra->monster.hp == 0) {
-            printf("You have to fight %s \n", typeMonster[terra->monster.type]);
-            return;
+    if(terra->monster.type == Drake && terra->monster.hp > 0) {
+        printf("You can't skip this land \n");
+        printf("You have to fight this %s \n", typeMonster[terra->monster.type]);
+        return;
+    } else {
+        if(route->next != NULL) {
+            route = route->next;
         }
-    }
-
-    if(route->next != NULL) {
-        route = route->next;
     }
 }
 
 static void get_coins() {
-    return;
+    Terra_t *terra = route;
+
+    if(terra->coins > 0 && oberon->bag_gold < 500) {
+        oberon->bag_gold += terra->coins;
+        printf("Oberon collect: %hd coins \n", terra->coins);
+        printf("Oberon's gold: %hd \n", oberon->bag_gold);
+        terra->coins = 0;
+    }
+
+    if(terra->coins == 0) {
+        printf("There are 0 coin in this land... \n");
+    }
+
+    if(oberon->bag_gold >= 500) {
+        printf("Oberon's bag is full of coins \n");
+    }
 }
 
 // static void use_potion() {
