@@ -15,22 +15,28 @@ static void spawn_monster(Mostro_t *monster);
 static int count_lands(Terra_t *terra);
 static void land_details(Terra_t *terra);
 static void initialize_oberon(Oberon_t *oberon);
-
+static void oberon_status();
+static void clear_game();
+static void game_status();
 
 static void go_forward();
 static void get_coins();
 static void fight();
 static void use_potion();
+static void destroy_land();
 
 static Terra_t *route = NULL;
 static Terra_t *last_land = NULL;
 
 static Oberon_t *oberon = NULL;
 
+static bool closeRoute = false;
 static bool endGame = false;
+static bool destroyed_land =  false;
+static bool end = false;
 
-static const char *typeLand[] = {"Desert", "Forest", "Swamp", "Village", "Plain"};
-static const char *typeMonster[] = {"None", "Skeleton", "Wolf", "Ogre", "Drake"};
+static char *typeLand[] = {"Desert", "Forest", "Swamp", "Village", "Plain"};
+static char *typeMonster[] = {"None", "Skeleton", "Wolf", "Ogre", "Drake"};
 
 /*
 TODO: Add docstring for this function
@@ -39,8 +45,7 @@ void crea_percorso() {
     system("clear");
     int choice;
 
-    endGame = false;
-
+    closeRoute = false;
     do{
         printf("----------------------------\n");
         printf("    What do you want to do? \n");
@@ -68,8 +73,7 @@ void crea_percorso() {
             default:
                 printf("Insert a valid choice \n");
         }
-    }while(!endGame);
-
+    }while(!closeRoute);
 }
 
 /*
@@ -117,6 +121,8 @@ static void ins_terra() {
             terra->type = Plain;
             printf("Plain inserted \n");
             break;
+        default:
+            printf("Insert a valid choice \n");
     }
 
     do{
@@ -225,7 +231,7 @@ static void stampa_percorso() {
 TODO: Add docstring for this function
 */
 static void chiudi_percorso() {
-    endGame = true;
+    closeRoute = true;
 }
 
 /*
@@ -275,6 +281,8 @@ static void spawn_monster(Mostro_t *monster) {
             monster->hp = 5;
             monster->damage = 5;
             break;
+        default:
+            printf("Insert a valid choice \n");
     }
 }
 
@@ -293,11 +301,16 @@ static int count_lands(Terra_t *terra) {
 
 void muovi_oberon() {
     initialize_oberon(oberon);
-
     system("clear");
+    end = false;
+
     int choice;
 
     do{
+        game_status();
+        printf("Oberon is in: \n");
+        land_details(route);
+        oberon_status();
         printf("----------------------------\n");
         printf("    What Oberon has to do?  \n");
         printf("----------------------------\n");
@@ -323,10 +336,10 @@ void muovi_oberon() {
                 fight();
                 break;
             case 5:
-                printf("Distruggi Terra \n");
+                destroy_land();
                 break;
         }
-    }while(true);
+    }while(!end);
 }
 
 static void land_details(Terra_t *terra) {
@@ -348,17 +361,15 @@ static void initialize_oberon() {
 }
 
 static void go_forward() {
+    if(route == NULL) return;
+
+    system("clear");
     static int count = 0;
     Terra_t *terra = route;
 
-    system("clear");
-
-    printf("Oberon is in %s \n", typeLand[terra->type]);
-    land_details(terra);
-
     if(terra->monster.type == Drake && terra->monster.hp > 0) {
         printf("You can't skip this land \n");
-        printf("You have to fight this %s \n", typeMonster[terra->monster.type]);
+        printf("You have to fight %s \n", typeMonster[terra->monster.type]);
         return;
     }
 
@@ -373,6 +384,10 @@ static void go_forward() {
 }
 
 static void get_coins() {
+    if(route == NULL) return;
+
+    system("clear");
+
     Terra_t *terra = route;
 
     if(terra->coins == 0) {
@@ -380,12 +395,18 @@ static void get_coins() {
         return;
     }
 
-    if(terra->coins > 0 && oberon->bag_gold < 500) {
-        oberon->bag_gold += terra->coins;
-        if(oberon->bag_gold > 500) oberon->bag_gold = 500;
-        printf("Oberon collect: %hd coins \n", terra->coins);
-        printf("Oberon's gold: %hd \n", oberon->bag_gold);
-        terra->coins = 0;
+    if(route->monster.hp <= 0){
+        if(terra->coins > 0 && oberon->bag_gold < 500) {
+            oberon->bag_gold += terra->coins;
+            if(oberon->bag_gold > 500) oberon->bag_gold = 500;
+            printf("Oberon collect: %hd coins \n", terra->coins);
+            printf("Oberon's gold: %hd \n", oberon->bag_gold);
+            terra->coins = 0;
+        }
+    }
+    else{
+        printf("================================================== \n");
+        printf("Oberon Must defeat the monster for take the coins \n");
     }
 
     if(oberon->bag_gold >= 500) {
@@ -394,6 +415,10 @@ static void get_coins() {
 }
 
 static void use_potion() {
+    if(route == NULL) return;
+
+    system("clear");
+
     if(oberon->health_potion != 0 && oberon->hp != 5) {
         printf("Oberon used a potion \n");
         oberon->hp = 5;
@@ -405,39 +430,140 @@ static void use_potion() {
 }
 
 static void fight() {
+    if(route == NULL) return;
 
-    if(oberon->spells != 0) {
-        srand(time(NULL));
+    system("clear");
 
-        if(rand() % 100 >= 60) {
-            route->monster.hp -= 3;
-            oberon->spells -= 1;
+    int choice;
+    printf("----------------------------\n");
+    printf("    What Oberon has to do?  \n");
+    printf("----------------------------\n");
+    printf("|     [1] Fight             | \n");
+    printf("|     [2] Use Spell         | \n");
+    printf("----------------------------\n");
+    scanf("%d", &choice);
 
-            if(route->monster.hp <= 0) {
-                printf("Monster has been defeated \n");
+    switch(choice) {
+        case 1:
+            srand(time(NULL));
+            if(rand() % 100 > 60) {
+                route->monster.hp -= 3;
+                if(route->monster.hp <= 0) {
+                    printf("Monster has been defeated \n");
+                    route->monster.type = None;
+                    route->monster.hp = 0;
+                    route->monster.damage = 0;
+                }
+            }
+            else {
+                printf("Oberon's attack failed... \n");
+            }
+            if(rand() % 100 > 50) {
+                if(route->monster.hp > 0) {
+                    printf("Monster: %s attacks \n", typeMonster[route->monster.type]);
+                    oberon->hp -= route->monster.damage;
+                    if(oberon->hp <= 0) {
+                        printf("Oberon has been defeated...\n");
+                        printf("GAME ENDED...\n");
+                        end = true;
+                    }
+                }
+            }
+            else {
+                printf("Monster attack failed \n");
+            }
+            break;
+
+        case 2:
+            if(oberon->spells != 0) {
                 route->monster.type = None;
                 route->monster.hp = 0;
+                route->monster.damage = 0;
+                oberon->spells -= 1;
+                printf("Monster defeated \n");
+            }
+            else {
+                printf("Oberon's spells are finished \n");
+            }
+            break;
+        default:
+            printf("Insert a valid choice \n");
+
+    }
+
+}
+
+static void destroy_land() {
+    if(route == NULL) return;
+
+    system("clear");
+
+    if(count_lands(route) == 0) {
+        printf("You can't use this skill spell \n");
+        return;
+    }
+
+    if(destroyed_land != true) {
+        if(route->next != NULL) {
+            Terra_t *terra = route->next;
+
+            if(terra->next != NULL){
+                printf("Destroying %s \n", typeLand[route->next->type]);
+                free(route->next);
+                route->next = terra->next;
+                last_land = terra->next;
+            }
+            else {
+                if(route->next == last_land) {
+                    printf("Destroying %s \n", typeLand[last_land->type]);
+                    free(last_land);
+                }
             }
         }
-        else{
-            printf("Oberon's attack failed... \n");
-        }
+        destroyed_land = true;
+    }
+    printf("You can't use this skill again \n");
+}
 
-        if(rand() % 100 >= 50) {
-            printf("Monster: %s attacks \n", typeMonster[route->monster.type]);
+static void oberon_status() {
+    printf("Oberon HP: %hd \n", oberon->hp);
+    printf("Oberon Spells: %hd \n", oberon->spells);
+    printf("Oberon Golds: %hd \n", oberon->bag_gold);
+    printf("Oberon Potion: %hd \n", oberon->health_potion);
+}
 
-            oberon->hp -= route->monster.damage;
-
-            if(oberon->hp <= 0) {
-                printf("Oberon has beed defeated game ended \n");
-            }
+static void clear_game() {
+    Terra_t *temp;
+    if(end == true) {
+        if(last_land != NULL) free(last_land);
+        free(oberon);
+        while((temp = route) != NULL) {
+            route = route->next;
+            free(temp);
         }
     }
-    else{
-        printf("Oberon can't use spells \n");
-        oberon->hp -= route->monster.damage;
+    printf("Memory deallocated \n");
+}
+
+static void game_status() {
+    if(route == last_land && route->monster.type == None && oberon->hp > 0) {
+        end = true;
+    }
+
+    if(end == true) {
+        if(oberon->hp > 0) {
+            printf("OBERON HAS WON! \n");
+            oberon_status();
+        }
+        else {
+            printf("OBERON HAS LOST \n");
+            oberon_status();
+        }
     }
 }
 
-// static void destroy_land() {
-// }
+void termina_gioco() {
+    printf("Game ended \n");
+    clear_game();
+    exit(0);
+}

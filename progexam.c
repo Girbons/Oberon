@@ -5,11 +5,11 @@ int main() {
     int choice;
 
     do{
-        printf("Cosa vuoi fare ? \n");
+        printf("What do you want to do ? \n");
         printf("+-----------------------------------------------------------------------------+\n");
-        printf("|                    [1] CREA PERCORSO                                        |\n");
-        printf("|                    [2] MUOVI OBERON                                         |\n");
-        printf("|                    [3] TERMINA GIOCO                                        |\n");
+        printf("|                    [1] Create Route                                          |\n");
+        printf("|                    [2] Move Oberon                                           |\n");
+        printf("|                    [3] End Game                                              |\n");
         printf("+-----------------------------------------------------------------------------+\n");
 
 
@@ -17,17 +17,16 @@ int main() {
 
         switch(choice){
             case 1:
-                printf("Crea percorso \n");
                 crea_percorso();
                 break;
             case 2:
-                printf("Muovi Oberon \n");
                 muovi_oberon();
                 break;
             case 3:
-                // TODO add function termina_gioco()
-                printf("Termina Gioco \n");
+                termina_gioco();
                 break;
+            default:
+                printf("Insert a valid chocice \n");
         }
     }while(choice != 3);
 }
