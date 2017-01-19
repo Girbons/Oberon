@@ -311,6 +311,7 @@ void muovi_oberon() {
         printf("Oberon is in: \n");
         land_details(route);
         oberon_status();
+        printf("\n\n\n");
         printf("----------------------------\n");
         printf("    What Oberon has to do?  \n");
         printf("----------------------------\n");
@@ -407,6 +408,7 @@ static void get_coins() {
     else{
         printf("================================================== \n");
         printf("Oberon Must defeat the monster for take the coins \n");
+        printf("================================================== \n");
     }
 
     if(oberon->bag_gold >= 500) {
@@ -432,9 +434,15 @@ static void use_potion() {
 static void fight() {
     if(route == NULL) return;
 
+    if(route->monster.type == None) {
+        printf("No monster in this land \n");
+        return;
+    }
+
     system("clear");
 
     int choice;
+    printf("\n\n\n");
     printf("----------------------------\n");
     printf("    What Oberon has to do?  \n");
     printf("----------------------------\n");
@@ -445,6 +453,7 @@ static void fight() {
 
     switch(choice) {
         case 1:
+            system("clear");
             srand(time(NULL));
             if(rand() % 100 > 60) {
                 route->monster.hp -= 3;
@@ -475,6 +484,7 @@ static void fight() {
             break;
 
         case 2:
+            system("clear");
             if(oberon->spells != 0) {
                 route->monster.type = None;
                 route->monster.hp = 0;
@@ -535,8 +545,9 @@ static void oberon_status() {
 static void clear_game() {
     Terra_t *temp;
     if(end == true) {
-        if(last_land != NULL) free(last_land);
-        free(oberon);
+        if(last_land != NULL) {
+            free(last_land);
+        }
         while((temp = route) != NULL) {
             route = route->next;
             free(temp);
@@ -552,12 +563,18 @@ static void game_status() {
 
     if(end == true) {
         if(oberon->hp > 0) {
+            printf("================================= \n");
             printf("OBERON HAS WON! \n");
             oberon_status();
+            printf("press a key for exit... \n");
+            printf("================================= \n");
         }
         else {
+            printf("================================= \n");
             printf("OBERON HAS LOST \n");
             oberon_status();
+            printf("press a key for exit... \n");
+            printf("================================= \n");
         }
     }
 }

@@ -33,3 +33,8 @@ typedef struct Oberon {
     short spells;
     short health_potion;
 } Oberon_t;
+
+
+void crea_percorso();
+void muovi_oberon();
+void termina_gioco();
