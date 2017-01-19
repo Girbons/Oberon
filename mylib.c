@@ -300,6 +300,10 @@ static int count_lands(Terra_t *terra) {
 }
 
 void muovi_oberon() {
+    if(route == NULL) {
+        printf("There are no lands \n");
+        return;
+    }
     initialize_oberon(oberon);
     system("clear");
     end = false;
@@ -363,6 +367,10 @@ static void initialize_oberon() {
 
 static void go_forward() {
     if(route == NULL) return;
+
+    if(route == last_land) {
+        end = true;
+    }
 
     system("clear");
     static int count = 0;
@@ -545,9 +553,6 @@ static void oberon_status() {
 static void clear_game() {
     Terra_t *temp;
     if(end == true) {
-        if(last_land != NULL) {
-            free(last_land);
-        }
         while((temp = route) != NULL) {
             route = route->next;
             free(temp);
